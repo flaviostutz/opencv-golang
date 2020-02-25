@@ -1,9 +1,10 @@
 # opencv-golang
-Container with tools for OpenCV and Golang along with support on XWindow export for development purposes
+Container with tools for OpenCV, Golang and Python along with support on XWindow export for development purposes
 
 Container contents:
-  * OpenCV 4.2 runtime
+  * OpenCV 4.2 - compiled with FFMPEG and GStreamer
   * Golang 1.13 tool chain
+  * Python 3.8
   * SSH server prepared for login with user/password root/root
 
 ## Tips on OpenCV applications development

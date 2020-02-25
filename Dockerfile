@@ -1,30 +1,104 @@
 # FROM czentye/opencv-video-minimal:4.2-py3.7.5
-FROM golang:1.14-rc-alpine
-
+FROM golang:1.14rc1-alpine3.11
 
 
 ## OPENCV 4.2
-RUN apk --update add git alpine-sdk cmake linux-headers
-RUN go get -u -d gocv.io/x/gocv
-WORKDIR $GOPATH/src/gocv.io/x/gocv
+# extracted from github.com/czentye/opencv-video-minimal
+# after https://github.com/czeni/opencv-video-minimal/pull/6/files is accepted, we could back to use its image
+ENV LANG=C.UTF-8
 
-# remove this after https://github.com/hybridgroup/gocv/pull/621 is accepted
-RUN sed -i 's/-DOPENCV_/-D OPENCV_/' Makefile
+ARG OPENCV_VERSION=4.2.0
 
-# RUN make install
-RUN make download
-RUN make build
-RUN make sudo_install
+RUN apk add --update --no-cache \
+    # Build dependencies
+    build-base clang clang-dev cmake pkgconf wget openblas openblas-dev \
+    linux-headers \
+    # Image IO packages
+    libjpeg-turbo libjpeg-turbo-dev \
+    libpng libpng-dev \
+    libwebp libwebp-dev \
+    tiff tiff-dev \
+    # jasper-libs jasper-dev \
+    openexr openexr-dev \
+    # Video depepndencies
+    ffmpeg-libs ffmpeg-dev \
+    libavc1394 libavc1394-dev \
+    gstreamer gstreamer-dev \
+    gst-plugins-base gst-plugins-base-dev \
+    libgphoto2 libgphoto2-dev && \
+    apk add --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \
+            --update --no-cache libtbb libtbb-dev && \
+    # Python dependencies
+    apk add --repository http://dl-cdn.alpinelinux.org/alpine/edge/main \
+            --update --no-cache python3 python3-dev && \
+    #apk add --repository http://dl-cdn.alpinelinux.org/alpine/edge/community \
+    #        --update --no-cache py-numpy py-numpy-dev && \
+    # Update also musl to avoid an Alpine bug
+    apk upgrade --repository http://dl-cdn.alpinelinux.org/alpine/edge/main musl && \
+    # Make Python3 as default
+    ln -vfs /usr/bin/python3 /usr/local/bin/python && \
+    ln -vfs /usr/bin/pip3 /usr/local/bin/pip && \
+    # Fix libpng path
+    ln -vfs /usr/include/libpng16 /usr/include/libpng && \
+    ln -vfs /usr/include/locale.h /usr/include/xlocale.h && \
+    pip3 install -v --no-cache-dir --upgrade pip && \
+    pip3 install -v --no-cache-dir numpy
 
-# remove this after https://github.com/czeni/opencv-video-minimal/pull/6 is accepted
-ENV PKG_CONFIG_PATH /usr/local/lib64/pkgconfig
-ENV LD_LIBRARY_PATH /usr/local/lib64/:/usr/local/include/
-RUN ln -s /usr/local/include/opencv4/opencv2/ /usr/local/include/opencv2
+RUN cd /tmp && \
+    # Download OpenCV source
+    wget https://github.com/opencv/opencv/archive/$OPENCV_VERSION.tar.gz && \
+    tar -xvzf $OPENCV_VERSION.tar.gz && \
+    rm -vrf $OPENCV_VERSION.tar.gz
 
-RUN apk add pkgconfig
-RUN go run ./cmd/version/main.go
-# RUN apk del --purge alpine-sdk cmake linux-headers
-RUN rm -rf /tmp/opencv/
+RUN mkdir -vp /tmp/opencv-$OPENCV_VERSION/build && \
+    # Configure
+    cd /tmp/opencv-$OPENCV_VERSION/build && \
+    cmake \
+        # Compiler params
+        -D CMAKE_BUILD_TYPE=RELEASE \
+        -D CMAKE_C_COMPILER=/usr/bin/clang \
+        -D CMAKE_CXX_COMPILER=/usr/bin/clang++ \
+        -D CMAKE_INSTALL_PREFIX=/usr \
+        # No examples
+        -D INSTALL_PYTHON_EXAMPLES=NO \
+        -D INSTALL_C_EXAMPLES=NO \
+        # Support
+        -D WITH_IPP=NO \
+        -D WITH_1394=NO \
+        -D WITH_LIBV4L=NO \
+        -D WITH_V4l=YES \
+        -D WITH_TBB=YES \
+        -D WITH_FFMPEG=YES \
+        -D WITH_GPHOTO2=YES \
+        -D WITH_GSTREAMER=YES \
+        # NO doc test and other bindings
+        -D BUILD_DOCS=NO \
+        -D BUILD_TESTS=NO \
+        -D BUILD_PERF_TESTS=NO \
+        -D BUILD_EXAMPLES=NO \
+        -D BUILD_opencv_java=NO \
+        -D BUILD_opencv_python2=NO \
+        -D BUILD_ANDROID_EXAMPLES=NO \
+        # Build Python3 bindings only
+        -D PYTHON3_LIBRARY=`find /usr -name libpython3.so` \
+        -D PYTHON_EXECUTABLE=`which python3` \
+        -D PYTHON3_EXECUTABLE=`which python3` \
+        -D OPENCV_GENERATE_PKGCONFIG=ON \
+        -D BUILD_opencv_python3=YES .. && \
+    # Build
+    make -j`grep -c '^processor' /proc/cpuinfo` && \
+    make install
+
+RUN cd / && rm -vrf /tmp/opencv-$OPENCV_VERSION && \
+    # Cleanup
+    apk del --purge build-base clang clang-dev cmake pkgconf wget openblas-dev \
+                    openexr-dev gstreamer-dev gst-plugins-base-dev libgphoto2-dev \
+                    libtbb-dev libjpeg-turbo-dev libpng-dev tiff-dev \
+                    ffmpeg-dev libavc1394-dev python3-dev && \
+                    rm -vrf /var/cache/apk/*
+
+ENV PKG_CONFIG_PATH /usr/lib64/pkgconfig
+ENV LD_LIBRARY_PATH /usr/lib64/:/usr/include/
 ## OPENCV 4.2
 
 
