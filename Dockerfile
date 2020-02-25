@@ -91,7 +91,7 @@ RUN mkdir -vp /tmp/opencv-$OPENCV_VERSION/build && \
 
 RUN cd / && rm -vrf /tmp/opencv-$OPENCV_VERSION && \
     # Cleanup
-    apk del --purge build-base clang clang-dev cmake pkgconf wget openblas-dev \
+    apk del --purge clang clang-dev wget openblas-dev \
                     openexr-dev gstreamer-dev gst-plugins-base-dev libgphoto2-dev \
                     libtbb-dev libjpeg-turbo-dev libpng-dev tiff-dev \
                     ffmpeg-dev libavc1394-dev python3-dev && \
