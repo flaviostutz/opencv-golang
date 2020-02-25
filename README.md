@@ -15,5 +15,5 @@ For doing this, follow the steps:
   * Start X server on you machine (XQuartz in MacOS)
   * Start container with "docker run --privileged -p 2222:22 flaviostutz/opencv-golang"
   * From your machine, connect to the container using "ssh -Y -p 2222 root@[CONTAINER HOST]"
-  * Once in SSH session, run an application, such as "[OpenCV]/facedetect.py --cascade cascade.xml". It will open your webcam and show its contents on a X-Window on your machine
+  * Once in SSH session, run an application, such as "/go/bin/test" that will show a feed from the Internet in a Window exported to your host machine
 
