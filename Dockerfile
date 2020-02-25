@@ -12,7 +12,7 @@ ARG OPENCV_VERSION=4.2.0
 RUN apk add --update --no-cache \
     # Build dependencies
     build-base clang clang-dev cmake pkgconf wget openblas openblas-dev \
-    linux-headers \
+    linux-headers gtk+2.0-dev \
     # Image IO packages
     libjpeg-turbo libjpeg-turbo-dev \
     libpng libpng-dev \
