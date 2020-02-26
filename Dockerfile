@@ -42,15 +42,13 @@ RUN apk add --update --no-cache \
     ln -vfs /usr/include/libpng16 /usr/include/libpng && \
     ln -vfs /usr/include/locale.h /usr/include/xlocale.h && \
     pip3 install -v --no-cache-dir --upgrade pip && \
-    pip3 install -v --no-cache-dir numpy
-
-RUN cd /tmp && \
+    pip3 install -v --no-cache-dir numpy && \
+    cd /tmp && \
     # Download OpenCV source
     wget https://github.com/opencv/opencv/archive/$OPENCV_VERSION.tar.gz && \
     tar -xvzf $OPENCV_VERSION.tar.gz && \
-    rm -vrf $OPENCV_VERSION.tar.gz
-
-RUN mkdir -vp /tmp/opencv-$OPENCV_VERSION/build && \
+    rm -vrf $OPENCV_VERSION.tar.gz && \
+    mkdir -vp /tmp/opencv-$OPENCV_VERSION/build && \
     # Configure
     cd /tmp/opencv-$OPENCV_VERSION/build && \
     cmake \
@@ -87,9 +85,8 @@ RUN mkdir -vp /tmp/opencv-$OPENCV_VERSION/build && \
         -D BUILD_opencv_python3=YES .. && \
     # Build
     make -j`grep -c '^processor' /proc/cpuinfo` && \
-    make install
-
-RUN cd / && rm -vrf /tmp/opencv-$OPENCV_VERSION && \
+    make install && \
+    cd / && rm -vrf /tmp/opencv-$OPENCV_VERSION && \
     # Cleanup
     apk del --purge clang clang-dev wget openblas-dev \
                     openexr-dev gstreamer-dev gst-plugins-base-dev libgphoto2-dev \
