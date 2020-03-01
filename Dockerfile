@@ -1,5 +1,5 @@
 # FROM czentye/opencv-video-minimal:4.2-py3.7.5
-FROM golang:1.14rc1-alpine3.11
+FROM golang:1.14.0-alpine3.11
 
 
 ## OPENCV 4.2
@@ -129,6 +129,6 @@ RUN go build -o /go/bin/test
 
 
 
-ADD startup.sh /startup.sh
+ADD start-ssh.sh /
 
-CMD [ "/startup.sh" ]
+CMD [ "/start-ssh.sh" ]
