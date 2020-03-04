@@ -4,7 +4,7 @@ services:
 
   opencv-golang:
     build: .
-    image: flaviostutz/opencv-golang:1.0.1
+    image: flaviostutz/opencv-golang:1.1.0
     ports:
       - "2222:22"
 

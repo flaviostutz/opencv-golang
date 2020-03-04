@@ -95,7 +95,8 @@ RUN cd / && rm -vrf /tmp/opencv-$OPENCV_VERSION && \
                     openexr-dev gstreamer-dev gst-plugins-base-dev libgphoto2-dev \
                     libtbb-dev libjpeg-turbo-dev libpng-dev tiff-dev \
                     ffmpeg-dev libavc1394-dev python3-dev && \
-                    rm -vrf /var/cache/apk/*
+    rm -vrf /var/cache/apk/* && \
+    rm -rf /tmp/*
 
 ENV PKG_CONFIG_PATH /usr/lib64/pkgconfig
 ENV LD_LIBRARY_PATH /usr/lib64/:/usr/include/
@@ -104,7 +105,7 @@ ENV LD_LIBRARY_PATH /usr/lib64/:/usr/include/
 
 
 ## SSH FOR XWINDOW EXPORT
-RUN apk --update add openssh xauth
+RUN apk --no-cache add openssh xauth
 RUN mkdir /var/run/sshd \
     && echo 'root:root' | chpasswd \
     && sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config \
