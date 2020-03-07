@@ -98,6 +98,8 @@ RUN cd / && rm -vrf /tmp/opencv-$OPENCV_VERSION && \
     rm -vrf /var/cache/apk/* && \
     rm -rf /tmp/*
 
+RUN apk add --no-cache git
+
 ENV PKG_CONFIG_PATH /usr/lib64/pkgconfig
 ENV LD_LIBRARY_PATH /usr/lib64/:/usr/include/
 ## OPENCV 4.2
